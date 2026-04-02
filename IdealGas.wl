@@ -8,6 +8,15 @@ PopulateSimulationBox::usage="populates simulation box with randomly placed part
 Begin["Private`"]
 
 
+\[CapitalDelta]l=20/9;
+PrototypeNeighborhood=Tuples[{0.,-\[CapitalDelta]l,\[CapitalDelta]l},3];
+
+LoopBack3[{x_,y_,z_},L_]:=Module[{\[DoubleStruckP],correction},
+\[DoubleStruckP]=2Abs[#]/L&/@{x,y,z}//Floor;
+correction=-L \[DoubleStruckP] Sign[{x,y,z}];
+{x,y,z}+correction
+];
+
 TorusDistance[{{v1_,v2_,v3_},{w1_,w2_,w3_}},L_]:=Block[{\[CapitalDelta]x,\[CapitalDelta]y,\[CapitalDelta]z},
 \[CapitalDelta]x=Min[Abs[v1-w1],L-Abs[v1-w1]];
 \[CapitalDelta]y=Min[Abs[v2-w2],L-Abs[v2-w2]];
@@ -21,12 +30,13 @@ neighborlist=Cases[pairs,n_/;TorusDistance[n,\[ScriptCapitalL]]<=Sqrt[3]\[Capita
 neighborlist[[All,2]]
 ];
 
-CreateSimulationBox[cells_]:=Block[{\[CapitalDelta]l,\[ScriptCapitalL],LinearBoundaries,VoxelBoundaries,VoxelCentres,Neighborhoods},
-\[CapitalDelta]l=20/9;\[ScriptCapitalL]=\[CapitalDelta]l*cells;
+CreateSimulationBox[cells_]:=Block[{\[ScriptCapitalL],DisplacementVectors,LinearBoundaries,VoxelBoundaries,VoxelCentres,Neighborhoods},
+\[ScriptCapitalL]=\[CapitalDelta]l*cells;
+DisplacementVectors=\[ScriptCapitalL] Range[-.5,.5,1/cells]//Tuples[#,3]&;
+Neighborhoods=Map[LoopBack3[#,\[ScriptCapitalL]+\[ScriptCapitalL]/cells]&,((PrototypeNeighborhood+ConstantArray[#,27])&/@DisplacementVectors),{2}];
 LinearBoundaries=Range[-\[ScriptCapitalL]/2,\[ScriptCapitalL]/2,\[CapitalDelta]l]//Partition[#,2,1]&;
 VoxelBoundaries=Tuples[LinearBoundaries,3];
-VoxelCentres=Map[Mean,VoxelBoundaries,{2}];
-Neighborhoods=FindNeighbors[#,VoxelCentres,\[CapitalDelta]l,\[ScriptCapitalL]]&/@VoxelCentres;
+VoxelCentres=Flatten[Neighborhoods,1]//DeleteDuplicates;
 <|"VoxelBoundaries"->VoxelBoundaries,"VoxelCentres"->VoxelCentres,"Neighborhoods"->Neighborhoods,"Length"->\[ScriptCapitalL]|>
 ];
 
