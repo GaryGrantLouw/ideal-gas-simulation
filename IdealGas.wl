@@ -106,23 +106,23 @@ SparseMin[ListOfArrays_]:=SparseArray[MapThread[Min,Normal/@ListOfArrays,2]]
 
 ConstructCollisionArray[trajectory_,\[DoubleStruckS]tate_]:=Module[{voxeldirectory,ONtimeline,PairTimeline,DistanceTimeline,SparseArrays,tWeights,Neighborhoods,NVoxels,\[ScriptCapitalL],\[ScriptCapitalN],Vc,Vb},
 \[ScriptCapitalL]=\[DoubleStruckS]tate["Length"];\[ScriptCapitalN]=\[DoubleStruckS]tate["Positions"]//Partition[#,3]&//Length;
-Print["extracted length and particle number..."];
+(*Print["extracted length and particle number..."];*)
 Vc=\[DoubleStruckS]tate["VoxelCentres"];Vb=\[DoubleStruckS]tate["VoxelBoundaries"];
-Print["extracted voxel centres and boundaries..."];
+(*Print["extracted voxel centres and boundaries..."];*)
 Neighborhoods=\[DoubleStruckS]tate["Neighborhoods"];
-Print["extracted all neighborhoods..."];
+(*Print["extracted all neighborhoods..."];*)
 voxeldirectory=ExtractVoxelDirectory[trajectory,Vb,Vc];
-Print["extracted voxel directory..."];
+(*Print["extracted voxel directory..."];*)
 NVoxels=NeighborhoodVoxels[Neighborhoods,Vc,Vb];
-Print["extracted all neighborhood\[LeftArrow]voxel relations..."];
+(*Print["extracted all neighborhood\[LeftArrow]voxel relations..."];*)
 ONtimeline=IdentifyOccupiedNeighborhoods[#,NVoxels]&/@voxeldirectory;
-Print["identified occupied neighborhoods for all time..."];
+(*Print["identified occupied neighborhoods for all time..."];*)
 PairTimeline=IdentifyPairs[#]&/@ONtimeline;
-Print["identified relevant pairs for all time..."];
+(*Print["identified relevant pairs for all time..."];*)
 DistanceTimeline=ComputeDistances[#[[1]],#[[2]],\[ScriptCapitalL]]&/@(Transpose@{PairTimeline,trajectory});
-Print["computed pairwise distances..."];
+(*Print["computed pairwise distances..."];*)
 SparseArrays=ConstructSparseArray[#[[1]],#[[2]],\[ScriptCapitalN]]&/@(Transpose@{PairTimeline,DistanceTimeline});
-Print["constructed sparse arrays..."];
+(*Print["constructed sparse arrays..."];*)
 tWeights=.25Range[Length[SparseArrays]];
 SparseMin[tWeights SparseArrays]//Normal[#]/.{\[Infinity]->0.}&
 ];
